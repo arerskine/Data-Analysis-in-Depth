@@ -1,0 +1,65 @@
+# read the states data
+states.data <- readRDS("dataSets/states.rds") 
+
+#get labels
+states.info <- data.frame(attributes(states.data)[c("names", "var.labels")])
+
+
+
+# Exercise 0: least squares regression
+
+# Examine and plot the data.
+str(states.data)
+sts.ene.met <- subset(states.data, select = c("energy", "metro"))
+summary(sts.ene.met)
+cor(sts.ene.met)
+plot(sts.ene.met)
+ene.met.mod <- lm(energy ~ metro, data=na.omit(states.data))
+
+# Print and interpret the model summary
+summary(ene.met.mod)
+
+# Repeat step and add a variable
+sts.ene.met.pop <- subset(states.data, select = c("energy", "metro", "pop"))
+summary(sts.ene.met.pop)
+ene.met.pop.mod <- lm(energy ~ metro + pop, data=na.omit(states.data))
+
+
+# Plot the model to see deviations from modeling assumptions
+plot(sts.ene.met.pop)
+anova(ene.met.mod, ene.met.pop.mod)
+coef(summary(ene.met.pop.mod))
+summary(ene.met.pop.mod)
+
+# The model predicting energy with metro had an adjusted R-squared of 0.07751 and the model predicting energy with metro and population had an adjusted R-squared of 0.05759. This means adding the pop variable did not help the model.
+
+
+# Exercise 1: Interactions and Factors
+
+#Add interaction to the previous model.
+ene.met.pop.mod2 <- lm(energy ~ metro*pop, data=states.data) 
+coef(summary(ene.met.pop.mod2))
+
+#Add region
+ene.region <- lm(energy ~ region, data=states.data)
+ 
+#Show coefficient summary and ANOVA
+coef(summary(ene.region))
+anova(ene.region)
+
+# There are somewhat significant differences by region.
+
+
+
+
+
+
+# Set factor reference groups and contrasts
+contrasts(states.data$region)
+coef(summary(lm(energy ~ C(region, base=4), data=states.data)))
+coef(summary(lm(energy ~ C(region, contr.helmert), data=states.data)))
+
+
+
+
+
